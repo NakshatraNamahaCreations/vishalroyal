@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Visha Royal Convention Hall — Next.js Website
 
-## Getting Started
+A complete marketing + booking site for the convention hall, built with **Next.js 16 (App Router)**, **React 19**, **TypeScript** and **Tailwind CSS v4**.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install     # already done
+npm run dev     # http://localhost:3000
+npm run build   # production build
+npm run start   # serve the production build
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Pages
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route       | What's on it                                                                 |
+| ----------- | ---------------------------------------------------------------------------- |
+| `/`         | Hero, stats, facilities, about strip, services, gallery preview, packages, testimonials, FAQ, CTA |
+| `/about`    | Story, stats band, milestone timeline, facilities grid                       |
+| `/services` | Six alternating service sections, deep-linkable via `#weddings`, `#corporate`, … |
+| `/gallery`  | Filterable gallery grid (client-side category filter)                        |
+| `/pricing`  | Silver / Gold / Platinum packages, add-on rate table, booking FAQ            |
+| `/contact`  | Contact cards, WhatsApp button, booking enquiry form, map embed              |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Plus `/sitemap.xml`, `/robots.txt`, a custom 404, JSON-LD `EventVenue` structured data, and Open Graph / Twitter metadata.
 
-## Learn More
+## Editing content
 
-To learn more about Next.js, take a look at the following resources:
+**Almost all text lives in one file: [`src/lib/site.ts`](src/lib/site.ts).**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Change the phone number, address, WhatsApp number, packages, services, FAQs, testimonials and gallery captions there and every page updates. Nothing is hard-coded in the components.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Start with these — they're placeholders right now:
 
-## Deploy on Vercel
+- `site.phone`, `site.phoneAlt`, `site.whatsapp` (digits only, with country code)
+- `site.email`, `site.address`
+- `site.mapEmbed` — paste your venue's Google Maps embed URL (Maps → Share → Embed a map)
+- `site.social` links
+- `packages` prices, and the `addOns` table in [`src/app/pricing/page.tsx`](src/app/pricing/page.tsx)
+- `milestones` in [`src/app/about/page.tsx`](src/app/about/page.tsx)
+- The domain in `metadataBase` ([`src/app/layout.tsx`](src/app/layout.tsx)), `sitemap.ts` and `robots.ts`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Adding real photos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Every image is currently a styled `<Placeholder />` (gradient + gold motif + caption), so the site looks finished with zero assets. To swap in real photos:
+
+1. Drop images into `public/gallery/` (e.g. `hall-01.jpg`).
+2. Replace `<Placeholder label="…" className="aspect-[4/3]" />` with:
+
+```tsx
+import Image from "next/image";
+
+<Image
+  src="/gallery/hall-01.jpg"
+  alt="Grand banquet hall"
+  width={1200}
+  height={900}
+  className="aspect-[4/3] w-full rounded-2xl object-cover"
+/>
+```
+
+The `Placeholder` component is in [`src/components/ui.tsx`](src/components/ui.tsx) — aspect ratios and rounding already match, so it's a drop-in swap.
+
+## The enquiry form
+
+`POST /api/enquiry` ([`src/app/api/enquiry/route.ts`](src/app/api/enquiry/route.ts)) validates the submission server-side and currently **logs it to the server console**. It works out of the box; to actually receive enquiries, replace the `console.log` with one of:
+
+- **Email** — `resend` or `nodemailer`
+- **Google Sheet** — Apps Script webhook
+- **CRM / WhatsApp Business API** — your existing pipeline
+
+## Design system
+
+Colours are CSS variables in [`src/app/globals.css`](src/app/globals.css) — deep maroon `--maroon`, antique gold `--gold`, warm ivory `--background`. Change them there and the whole site re-themes. Fonts: Cormorant Garamond (headings) + Inter (body), self-hosted via `next/font`.
+
+## Deploy
+
+Push to GitHub and import on [Vercel](https://vercel.com) — zero config. Or `npm run build && npm run start` behind any Node host.

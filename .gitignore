@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Original camera files kept locally as a backup, not source code.
+# The optimised versions the site actually serves live in /public.
+/assets-original
