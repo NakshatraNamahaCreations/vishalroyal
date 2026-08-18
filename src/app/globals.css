@@ -1,0 +1,269 @@
+@import "tailwindcss";
+
+:root {
+  /* Taken straight off the logo: gold emblem on black, set on warm off-white.
+     --ink replaces the old maroon everywhere. */
+  --background: #f8f6f2;
+  --foreground: #171614;
+  --ink: #232323;
+  --ink-deep: #0c0c0c;
+  --gold: #c9a14a;
+  --gold-soft: #e8d3a0;
+  --cream: #efeae1;
+  --muted: #6f6a62;
+  --border: #e3ded4;
+  --surface: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-ink-deep: var(--ink-deep);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-cream: var(--cream);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+/* Must live in @layer base — an unlayered rule would outrank Tailwind's
+   utilities and break `border-transparent` on the overlay header. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Keep #anchor targets clear of the fixed overlay header */
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Cormorant Garamond defaults to oldstyle figures, which renders "100" as
+   "IOO" and "070" as "o7o". Force lining, tabular figures wherever we print
+   numbers in the display face. */
+.nums {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+
+/* Scroll-snap carousels drive themselves with arrow buttons, so the native
+   scrollbar is redundant. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Thin gold rule used under section headings */
+.gold-rule {
+  display: inline-block;
+  width: 4.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Subtle repeating motif for hero / CTA backgrounds */
+.royal-pattern {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(200, 160, 74, 0.28) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* Placeholder tiles stand in for real photographs. Drop images into
+   /public/gallery and swap <Placeholder /> for <Image /> when you have them. */
+.placeholder-sheen {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, transparent 45%),
+    linear-gradient(200deg, var(--ink-deep), var(--ink) 55%, #3a3a3a 100%);
+}
+
+/* Slow drift on the active hero slide so the image never feels static */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.16) translate3d(-1.5%, -1%, 0);
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 9s ease-out forwards;
+}
+
+/* Intro loader reveal. A curved edge grows up from the bottom of the screen and
+   eats the overlay away, so the page is uncovered bottom-to-top. The clip's
+   bottom corner radii interpolate from square to a wide arc, which is what
+   bends the advancing edge. */
+@keyframes loader-reveal {
+  from {
+    clip-path: inset(0 0 0% 0 round 0);
+  }
+  to {
+    clip-path: inset(0 0 100% 0 round 0 0 50% 50% / 0 0 60% 60%);
+  }
+}
+
+.animate-loader-reveal {
+  animation: loader-reveal 1.15s cubic-bezier(0.72, 0, 0.28, 1) forwards;
+}
+
+/* Safety net: if the intro's JS never completes (hydration error, throttled
+   rAF in a background tab), the overlay fades itself out rather than leaving a
+   blank screen over the site. Deliberately NOT disabled by reduced-motion. */
+@keyframes loader-failsafe {
+  0%,
+  88% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.animate-loader-failsafe {
+  animation: loader-failsafe 10s linear forwards;
+}
+
+/* The logo drifts up a touch as the curve closes over it. */
+@keyframes loader-content-out {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, -40px, 0);
+    opacity: 0;
+  }
+}
+
+.animate-loader-content-out {
+  animation: loader-content-out 0.85s cubic-bezier(0.72, 0, 0.28, 1) forwards;
+}
+
+/* Seamless right-to-left marquee. The track holds two identical copies of the
+   tiles, so shifting it by exactly -50% loops without a visible jump. */
+@keyframes marquee-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-x 48s linear infinite;
+  will-change: transform;
+}
+
+.marquee-host:hover .animate-marquee,
+.marquee-host:focus-within .animate-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes slide-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-slide-progress {
+  transform-origin: left;
+  animation: slide-progress linear forwards;
+}
+
+/* Gentle continuous drift for the About arches. Uses transform, so the element
+   it sits on must not also carry a translate utility. */
+@keyframes soft-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+.animate-float {
+  animation: soft-float 6.5s ease-in-out infinite;
+}
+
+/* Scroll-triggered reveal, driven by <Reveal>. */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-fade-up,
+  .animate-ken-burns,
+  .animate-slide-progress,
+  .animate-marquee,
+  .animate-loader-reveal,
+  .animate-loader-content-out,
+  .animate-float {
+    animation: none;
+  }
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
